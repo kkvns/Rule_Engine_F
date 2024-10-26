@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rule Engine</title>
+</head>
+<body>
+    <h1>Create Rule</h1>
+    <form id="create-rule-form">
+        <textarea id="rule" placeholder="Enter your rule"></textarea>
+        <button type="button" onclick="createRule()">Create Rule</button>
+    </form>
+
+    <h1>Evaluate Rule</h1>
+    <form id="evaluate-rule-form">
+        <input type="text" id="rule_id" placeholder="Rule ID">
+        <textarea id="data" placeholder="Enter data as JSON"></textarea>
+        <button type="button" onclick="evaluateRule()">Evaluate</button>
+    </form>
+
+    <script>
+        function createRule() {
+            const rule = document.getElementById('rule').value.trim();
+            if (rule === "") {
+                alert("Please enter a rule");
+                return;
+            }
+            fetch('/create_rule', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ rule: rule })
+            }).then(response => response.json())
+              .then(data => alert('Rule Created: ' + JSON.stringify(data)))
+              .catch(error => console.error('Error:', error));
+        }
+
+        function evaluateRule() {
+            const ruleId = document.getElementById('rule_id').value;
+            const data = document.getElementById('data').value;
+
+            try {
+                const parsedData = JSON.parse(data);
+                fetch('/evaluate_rule', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rule_id: ruleId, data: parsedData })
+                }).then(response => response.json())
+                  .then(data => alert('Evaluation Result: ' + JSON.stringify(data)))
+                  .catch(error => console.error('Error:', error));
+            } catch (e) {
+                alert('Invalid JSON format');
+                console.error('Invalid JSON format:', e);
+            }
+        }
+    </script>
+</body>
+</html>
